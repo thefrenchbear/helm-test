@@ -1,0 +1,38 @@
+version: 2.1
+orbs:
+  boost-security-scanner: boostsecurityio/scanner@4.1.0
+workflows:
+  version: 2
+  build:
+    jobs:
+      - boost-security-scan:
+          context: boost-security
+jobs:
+  boost-security-scan:
+    machine:
+      docker_layer_caching: true
+      image: ubuntu-2004:2023.07.1
+    steps:
+      - checkout
+
+      - run:
+          name: Install pre-scan dependencies
+          command: |
+            download_verify_and_unpack() {
+              (curl -s -L "$1" | tee /tmp/toxic | shasum -s -a256 -c <(echo "$3  -") && tar -C  $(dirname "$2") -xzf /tmp/toxic "$4" && if [[ ! -z "$4" ]]; then mv "$(dirname $2)/$4" "$2"; else true; fi && chmod +x "$2") || (rm -f /tmp/toxic && false)
+            }
+            download_verify_and_unpack https://get.helm.sh/helm-v3.7.1-linux-amd64.tar.gz /home/circleci/bin/helm 6cd6cad4b97e10c33c978ff3ac97bb42b68f79766f1d2284cfd62ec04cd177f4 linux-amd64/helm
+
+      - boost-security-scanner/scan:
+          registry_module: scanners/boostsecurityio/checkov
+          context: boost-security
+          api_token: $BOOST_API_TOKEN
+          name: Scan Helm Charts
+
+          # Because this example is specific to helm, the `helm`
+          # binary is locally rendering the chart to the ./generated
+          # directory. You will need to alter `charts/hello-world`
+          # to refer to the directory that your chart exists in.
+          # The value chosen for --output-dir is arbitrary.
+
+          pre_scan_cmd: helm template charts/hello-world --output-dir ./generated
