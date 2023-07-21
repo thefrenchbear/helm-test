@@ -26,7 +26,7 @@ jobs:
       - boost-security-scanner/scan:
           registry_module: scanners/boostsecurityio/checkov
           context: boost-security
-          api_token: ${BOOST_API_TOKEN}
+          api_token: BOOST_API_TOKEN
           name: Scan Helm Charts
 
           # Because this example is specific to helm, the `helm`
