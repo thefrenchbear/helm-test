@@ -1,0 +1,34 @@
+name: boostsecurity.io
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - develop
+    types:
+      - opened
+      - synchronize
+jobs:
+  boost-sast:
+    name: SAST
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.7.1
+
+      - name: BoostSecurity Scanner
+        uses: boostsecurityio/boostsec-scanner-github@v4
+        continue-on-error: true
+        with:
+          api_token: ${{ secrets.BOOST_API_KEY }}
+          registry_module: boostsecurityio/scanner
+          pre_scan_cmd: |
+            helm template charts/hello-world --output-dir ./generated
