@@ -18,16 +18,18 @@ jobs:
     continue-on-error: true
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9 # 3.5.3
+
       - name: Setup Helm
-        uses: azure/setup-helm@v3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78 # 3.5.0
         with:
           version: v3.7.1
 
       - name: BoostSecurity Scanner
-        uses: boostsecurityio/boostsec-scanner-github@v4
+        uses: boostsecurityio/boostsec-scanner-github@31f100baacbd412f471ce1f2f64c02d138bf7249 # 4.0.0
         with:
           api_token: ${{ secrets.BOOST_API_TOKEN }}
           registry_module: boostsecurityio/checkov
           pre_scan_cmd: |
+            # test comment
             helm template charts/hello-world --output-dir ./generated
